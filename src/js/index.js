@@ -1,7 +1,7 @@
-import { OrbitControls } from './three.js-master/examples/jsm/controls/OrbitControls.js';
-import { EffectComposer } from './three.js-master/examples/jsm/postprocessing/EffectComposer.js';
-import { RenderPass } from './three.js-master/examples/jsm/postprocessing/RenderPass.js';
-import { ShaderPass } from './three.js-master/examples/jsm/postprocessing/ShaderPass.js';
+import { OrbitControls } from '/three.js-master/examples/jsm/controls/OrbitControls.js';
+import { EffectComposer } from '/three.js-master/examples/jsm/postprocessing/EffectComposer.js';
+import { RenderPass } from '/three.js-master/examples/jsm/postprocessing/RenderPass.js';
+import { ShaderPass } from '/three.js-master/examples/jsm/postprocessing/ShaderPass.js';
 
 //=======================================================
 
@@ -26,6 +26,7 @@ const homeFragment = `
 
 	uniform sampler2D u_texture;
 	uniform sampler2D u_texture2;
+	uniform sampler2D u_texture3;
 
 	uniform float u_time;
 	varying vec2 v_uv;
@@ -50,7 +51,7 @@ const homeFragment = `
 		//gl_FragColor  = vec4(rgba);
 
 
-		gl_FragColor  = vec4(colorCurrent.x + colorNext, 1.0);
+		gl_FragColor  = vec4(colorCurrent + colorNext, 1.);
 	  }
 `
 
@@ -103,10 +104,34 @@ const filmFragment = `
 
 let cursor = document.querySelector('.cursor');
 window.addEventListener('mousemove', (e)=>{
-	//cursor.style.top = e.pageY + 'px';
-	//cursor.style.left = e.pageX + 'px';
+	cursor.style.top = e.pageY + 'px';
+	cursor.style.left = e.pageX + 'px';
 });
 
+//EVENTOS DO MOUSE
+
+//start btn
+const shopBtn = document.querySelector('.shop-btn');
+shopBtn.addEventListener('mouseover', () => {
+	cursor.classList.add('cursor-hovering-btn');
+})
+shopBtn.addEventListener('mouseleave', () => {
+	cursor.classList.remove('cursor-hovering-btn');
+})
+shopBtn.addEventListener('click', () => {
+	gsap.to('#click-here', {opacity: 0, duration: 0.2});
+	gsap.to('#scroll-down', {opacity: 1, duration: 0.3});
+})
+//links laterais
+const linksNav = document.querySelectorAll('.side-nav div');
+linksNav.forEach(item => {
+	item.addEventListener('mouseover', ()=> {
+		cursor.classList.add('cursor-hovering');
+	});
+	item.addEventListener('mouseleave', ()=> {
+		cursor.classList.remove('cursor-hovering');
+	});
+});
 
 //cena
 
@@ -144,6 +169,7 @@ const homeUniforms = {
 	u_mouse: {value: new THREE.Vector2(0., 0.)},
 	u_texture: {value: new THREE.TextureLoader().load('src/assets/modelo-fundo-preto-invertida.png')},
 	u_texture2: {value: new THREE.VideoTexture(video)},
+	u_texture3: {value: new THREE.VideoTexture(video2)},
 	u_progress: {value: 0},
 };
 const homeShader = new THREE.ShaderMaterial({
@@ -182,7 +208,7 @@ scene.add(shop);
 shop.position.y = -2;
 
 
-
+/* POSSIVELMENTE UM NOVO JS
 // imagens da loja
 
 const imgGeometry = new THREE.PlaneGeometry(0.65, 0.9)
@@ -209,19 +235,19 @@ images[3].position.x = -1;
 images[4].position.y = -2.2;
 images[4].position.x = 1;
 images[5].position.y = -2;
-*/
+
 
 images[0].position.x = -1;
 images[0].position.y = -1;
 images[1].position.y = -1.2;
 images[2].position.x = 1;
-images[2].position.x = 1;
+images[2].position.y = -1;
 images[3].position.y = -2.2;
 images[3].position.x = -1;
 images[4].position.y = -2.2;
 images[4].position.x = 1;
 images[5].position.y = -2;
-
+*/
 
 // letras verticais animadas
 
@@ -311,6 +337,10 @@ $('body').on('click', ()=> {
 
 //SCROLL
 
+const deluxTitle = document.querySelector('#delux-title');
+
+const btn = document.querySelector('.shop-btn');
+
 let speed = 0;
 let position = 0;
 document.addEventListener('wheel', (e)=> {
@@ -329,6 +359,17 @@ function raf() {
 	position += dif * 0.03;
 
 	homeShader.uniforms.u_progress.value = position;
+	btn.style.transform = `translate(0, ${position * 100}%)`;
+	if(position > 0.7) {
+		gsap.to('#delux-title', {webkitTextStrokeColor: 'black', duration: 1});
+		gsap.to('#victoria-title', {opacity: 0, duration: 0.5});
+		gsap.to('.side-nav', {opacity: 0, duration: 0.5});
+	} if (position < 0.7) {
+		gsap.to('#delux-title', {webkitTextStrokeColor: '#a9aaacff', duration: 1});
+		gsap.to('#victoria-title', {opacity: 1, duration: 1});
+		gsap.to('.side-nav', {opacity: 1, duration: 1});
+	}
+
 	requestAnimationFrame(raf);
 }
 
